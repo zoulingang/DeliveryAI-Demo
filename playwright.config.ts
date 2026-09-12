@@ -1,6 +1,6 @@
 import { defineConfig, devices } from '@playwright/test'
 
-const CHROMIUM_PATH = '/home/gem/.cache/ms-playwright/chromium-1234/chrome-linux64/chrome'
+const CHROMIUM_PATH = '/usr/bin/chromium-browser'
 
 export default defineConfig({
   testDir: './e2e',
@@ -15,7 +15,7 @@ export default defineConfig({
     baseURL: 'http://localhost:5173',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
-    video: 'retain-on-failure',
+    video: 'off',
     headless: true,
     launchOptions: {
       executablePath: CHROMIUM_PATH,
