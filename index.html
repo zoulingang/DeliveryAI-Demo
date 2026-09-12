@@ -8,15 +8,20 @@
     <title>沸点 · 火锅点单概念演示</title>
     <script>
       // 防止主题闪烁 (FOUC)：在 React 渲染前同步确定初始主题
-      // 优先级：localStorage > prefers-color-scheme > 默认浅色
+      // 优先级：localStorage > prefers-color-scheme > 默认跟随系统(Auto)
       (function () {
         try {
           var stored = localStorage.getItem('theme');
+          var shouldDark = false;
           if (stored === 'dark') {
-            document.documentElement.classList.add('dark');
+            shouldDark = true;
           } else if (stored === 'light') {
-            document.documentElement.classList.remove('dark');
-          } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            shouldDark = false;
+          } else {
+            // stored === 'auto' 或无值（首次使用）：跟随系统
+            shouldDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          }
+          if (shouldDark) {
             document.documentElement.classList.add('dark');
           }
         } catch (e) {

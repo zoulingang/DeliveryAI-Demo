@@ -1,4 +1,5 @@
-import { Accessibility, Crown, Languages, LayoutDashboard, MapPin, Moon, PhoneCall, ReceiptText, Search, Sun, UserRound } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { Accessibility, Check, Crown, Languages, LayoutDashboard, MapPin, Monitor, Moon, PhoneCall, ReceiptText, Search, Sun, UserRound } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
@@ -9,10 +10,11 @@ interface TopBarProps {
   table: string
   view: ViewName
   serviceCount: number
-  theme: 'light' | 'dark'
+  theme: 'light' | 'dark' | 'auto'
+  resolvedTheme: 'light' | 'dark'
   language: string
   elderly: boolean
-  onToggleTheme: () => void
+  onSetTheme: (theme: 'light' | 'dark' | 'auto') => void
   onToggleLanguage: () => void
   onToggleElderly: () => void
   onView: (view: ViewName) => void
@@ -20,7 +22,7 @@ interface TopBarProps {
   onConsole: () => void
 }
 
-export function TopBar({ table, view, serviceCount, theme, language, elderly, onToggleTheme, onToggleLanguage, onToggleElderly, onView, onService, onConsole }: TopBarProps) {
+export function TopBar({ table, view, serviceCount, theme, resolvedTheme, language, elderly, onSetTheme, onToggleLanguage, onToggleElderly, onView, onService, onConsole }: TopBarProps) {
   const { t } = useTranslation()
   const areaKey = tableAreas[table]
   const tableLabel = areaKey ? `${table} · ${t(areaKey)}` : table
@@ -64,11 +66,63 @@ export function TopBar({ table, view, serviceCount, theme, language, elderly, on
           <Button variant="outline" size="sm" onClick={onToggleLanguage} aria-label={t('common.aria_lang')}>
             <Languages size={16} />{language === 'zh' ? 'EN' : '中'}
           </Button>
-          <Button variant="outline" size="icon" onClick={onToggleTheme} aria-label={theme === 'dark' ? t('common.aria_light') : t('common.aria_dark')}>
-            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-          </Button>
+          <ThemeMenu theme={theme} resolvedTheme={resolvedTheme} onSetTheme={onSetTheme} />
         </div>
       </header>
     </>
+  )
+}
+
+/* ─── 主题切换弹出菜单 ─── */
+
+const themeOptions = [
+  { value: 'light', icon: Sun },
+  { value: 'dark', icon: Moon },
+  { value: 'auto', icon: Monitor },
+] as const
+
+function ThemeMenu({ theme, resolvedTheme, onSetTheme }: { theme: 'light' | 'dark' | 'auto'; resolvedTheme: 'light' | 'dark'; onSetTheme: (theme: 'light' | 'dark' | 'auto') => void }) {
+  const { t } = useTranslation()
+  const [open, setOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  // 点击菜单外部关闭菜单
+  useEffect(() => {
+    if (!open) return
+    const handler = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [open])
+
+  const handleSelect = (value: 'light' | 'dark' | 'auto') => {
+    onSetTheme(value)
+    setOpen(false)
+  }
+
+  return (
+    <div className="relative" ref={menuRef}>
+      <Button variant="outline" size="icon" onClick={() => setOpen((prev) => !prev)} aria-label={t('common.aria_theme')}>
+        {resolvedTheme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+      </Button>
+      {open && (
+        <div className="absolute right-0 top-full z-50 mt-2 w-44 overflow-hidden rounded-2xl border border-charcoal-900/5 bg-white p-1 shadow-float dark:border-white/10 dark:bg-charcoal-700">
+          {themeOptions.map(({ value, icon: Icon }) => (
+            <button
+              key={value}
+              onClick={() => handleSelect(value)}
+              className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition ${theme === value ? 'bg-chili-50 text-chili-600 dark:bg-chili-500/15 dark:text-chili-500' : 'text-charcoal-700 hover:bg-rice-100 dark:text-rice-200 dark:hover:bg-charcoal-900'}`}
+            >
+              <Icon size={16} />
+              <span className="flex-1 text-left">{t(`common.theme_${value}`)}</span>
+              {theme === value && <Check size={15} className="text-chili-500" />}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   )
 }

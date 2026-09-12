@@ -37,7 +37,7 @@ function createPreviewState(): AppState {
 export default function App() {
   const { t, i18n } = useTranslation()
   const [state, dispatch] = useReducer(orderReducer, initialState, createPreviewState)
-  const { theme, toggle: toggleTheme } = useTheme()
+  const { theme, resolvedTheme, setTheme } = useTheme()
   const { enabled: elderly, toggle: toggleElderly } = useElderlyMode()
   const [serviceOpen, setServiceOpen] = useState(false)
   const [consoleOpen, setConsoleOpen] = useState(false)
@@ -85,9 +85,10 @@ export default function App() {
         view={state.view}
         serviceCount={waitingServices}
         theme={theme}
+        resolvedTheme={resolvedTheme}
+        onSetTheme={setTheme}
         language={i18n.language}
         elderly={elderly}
-        onToggleTheme={toggleTheme}
         onToggleLanguage={toggleLanguage}
         onToggleElderly={handleToggleElderly}
         onView={changeView}

@@ -13,6 +13,8 @@ export default {
       boxShadow: {
         card: '0 10px 30px rgba(70, 45, 25, 0.08)',
         float: '0 18px 55px rgba(78, 34, 20, 0.18)',
+        'card-dark': '0 10px 30px rgba(0, 0, 0, 0.25)',
+        'float-dark': '0 18px 55px rgba(0, 0, 0, 0.4)',
       },
       fontFamily: { sans: ['Inter', 'Noto Sans SC', 'system-ui', 'sans-serif'] },
       keyframes: { rise: { '0%': { opacity: '0', transform: 'translateY(8px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } } },
