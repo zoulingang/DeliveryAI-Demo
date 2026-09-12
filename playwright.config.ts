@@ -8,7 +8,7 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: 0,
   workers: 1,
-  reporter: [['html', { outputDir: 'e2e-report/html' }], ['list']],
+  reporter: [['html', { outputFolder: 'e2e-report/html' }], ['list']],
   timeout: 30000,
   expect: { timeout: 10000 },
   use: {
