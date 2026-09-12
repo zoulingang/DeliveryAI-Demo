@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
-import { Accessibility, Check, Crown, Languages, LayoutDashboard, MapPin, Monitor, Moon, PhoneCall, ReceiptText, Search, Sun, UserRound } from 'lucide-react'
+import { Accessibility, Check, Coins, Crown, Languages, LayoutDashboard, MapPin, Monitor, Moon, PhoneCall, ReceiptText, Search, Sun, UserRound } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
 import { tableAreas } from '@/data/menu'
-import type { ViewName } from '@/types'
+import type { Currency, ViewName } from '@/types'
 
 interface TopBarProps {
   table: string
@@ -14,15 +14,17 @@ interface TopBarProps {
   resolvedTheme: 'light' | 'dark'
   language: string
   elderly: boolean
+  currency: Currency
   onSetTheme: (theme: 'light' | 'dark' | 'auto') => void
   onToggleLanguage: () => void
   onToggleElderly: () => void
+  onSetCurrency: (currency: Currency) => void
   onView: (view: ViewName) => void
   onService: () => void
   onConsole: () => void
 }
 
-export function TopBar({ table, view, serviceCount, theme, resolvedTheme, language, elderly, onSetTheme, onToggleLanguage, onToggleElderly, onView, onService, onConsole }: TopBarProps) {
+export function TopBar({ table, view, serviceCount, theme, resolvedTheme, language, elderly, currency, onSetTheme, onToggleLanguage, onToggleElderly, onSetCurrency, onView, onService, onConsole }: TopBarProps) {
   const { t } = useTranslation()
   const areaKey = tableAreas[table]
   const tableLabel = areaKey ? `${table} · ${t(areaKey)}` : table
@@ -55,7 +57,7 @@ export function TopBar({ table, view, serviceCount, theme, resolvedTheme, langua
               </div>
               <div className="mt-4 grid grid-cols-2 gap-3">
                 <div className="rounded-2xl bg-white p-4 shadow-sm dark:bg-charcoal-700"><p className="text-xs text-charcoal-500 dark:text-rice-200/60">{t('common.queue')}</p><p className="mt-2 text-2xl font-extrabold text-charcoal-900 dark:text-rice-100">A018</p><p className="text-xs text-chili-500">{t('common.queue_ahead')}</p></div>
-                <div className="rounded-2xl bg-white p-4 shadow-sm dark:bg-charcoal-700"><p className="text-xs text-charcoal-500 dark:text-rice-200/60">{t('common.benefits')}</p><p className="mt-2 text-2xl font-extrabold text-charcoal-900 dark:text-rice-100">4 <small className="text-sm">{t('common.tickets')}</small></p><p className="text-xs text-amber-500">{t('common.coupon')}</p></div>
+                <div className="rounded-2xl bg-white p-4 shadow-sm dark:bg-charcoal-700"><p className="text-xs text-charcoal-500 dark:text-rice-200/60">{t('common.benefits')}</p><p className="mt-2 text-2xl font-extrabold text-charcoal-900 dark:text-rice-100">4 <small className="text-sm">{t('common.tickets')}</small></p><p className="text-xs text-amber-500">{t('common.coupon', { amount: currency === 'USD' ? '$4.29' : '¥30.00' })}</p></div>
               </div>
             </DialogContent>
           </Dialog>
@@ -66,10 +68,65 @@ export function TopBar({ table, view, serviceCount, theme, resolvedTheme, langua
           <Button variant="outline" size="sm" onClick={onToggleLanguage} aria-label={t('common.aria_lang')}>
             <Languages size={16} />{language === 'zh' ? 'EN' : '中'}
           </Button>
+          <CurrencyMenu currency={currency} onSetCurrency={onSetCurrency} />
           <ThemeMenu theme={theme} resolvedTheme={resolvedTheme} onSetTheme={onSetTheme} />
         </div>
       </header>
     </>
+  )
+}
+
+/* ─── 币种切换弹出菜单 ─── */
+
+const currencyOptions: { value: Currency; symbol: string }[] = [
+  { value: 'CNY', symbol: '¥' },
+  { value: 'USD', symbol: '$' },
+]
+
+function CurrencyMenu({ currency, onSetCurrency }: { currency: Currency; onSetCurrency: (currency: Currency) => void }) {
+  const { t } = useTranslation()
+  const [open, setOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  // 点击菜单外部关闭菜单
+  useEffect(() => {
+    if (!open) return
+    const handler = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [open])
+
+  const handleSelect = (value: Currency) => {
+    onSetCurrency(value)
+    setOpen(false)
+  }
+
+  return (
+    <div className="relative" ref={menuRef}>
+      <Button variant="outline" size="icon" onClick={() => setOpen((prev) => !prev)} aria-label={t('common.aria_currency')}>
+        <Coins size={18} />
+        <span className="ml-0.5 text-xs font-bold">{currency === 'CNY' ? '¥' : '$'}</span>
+      </Button>
+      {open && (
+        <div className="absolute right-0 top-full z-50 mt-2 w-44 overflow-hidden rounded-2xl border border-charcoal-900/5 bg-white p-1 shadow-float dark:border-white/10 dark:bg-charcoal-700">
+          {currencyOptions.map(({ value, symbol }) => (
+            <button
+              key={value}
+              onClick={() => handleSelect(value)}
+              className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition ${currency === value ? 'bg-chili-50 text-chili-600 dark:bg-chili-500/15 dark:text-chili-500' : 'text-charcoal-700 hover:bg-rice-100 dark:text-rice-200 dark:hover:bg-charcoal-900'}`}
+            >
+              <span className="text-base font-black">{symbol}</span>
+              <span className="flex-1 text-left">{t(`common.currency_${value.toLowerCase()}`)}</span>
+              {currency === value && <Check size={15} className="text-chili-500" />}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   )
 }
 

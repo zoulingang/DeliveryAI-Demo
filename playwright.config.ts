@@ -1,6 +1,6 @@
 import { defineConfig, devices } from '@playwright/test'
 
-const CHROMIUM_PATH = '/home/gem/.cache/ms-playwright/chromium-1234/chrome-linux64/chrome'
+const CHROMIUM_PATH = "/usr/bin/chromium-browser"
 
 export default defineConfig({
   testDir: './e2e',
@@ -9,13 +9,13 @@ export default defineConfig({
   retries: 0,
   workers: 1,
   reporter: [['html', { outputDir: 'e2e-report/html' }], ['list']],
-  timeout: 30000,
+  timeout: 60000,
   expect: { timeout: 10000 },
   use: {
     baseURL: 'http://localhost:5173',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
-    video: 'retain-on-failure',
+    video: 'off',
     headless: true,
     launchOptions: {
       executablePath: CHROMIUM_PATH,
@@ -29,6 +29,6 @@ export default defineConfig({
     command: 'npm run dev',
     url: 'http://localhost:5173',
     reuseExistingServer: !process.env.CI,
-    timeout: 30000,
+    timeout: 60000,
   },
 })

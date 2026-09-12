@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { Check, ChefHat, ChevronRight, Clock3, Plus, ReceiptText, RotateCcw, UtensilsCrossed } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { money } from '@/lib/utils'
-import type { OrderItem, OrderStage } from '@/types'
+import type { Currency, OrderItem, OrderStage } from '@/types'
 
 const stageIcons: Record<OrderStage, typeof Check> = {
   submitted: ReceiptText,
@@ -16,12 +16,13 @@ const rank: Record<OrderStage, number> = { submitted: 0, accepted: 1, cooking: 2
 interface OrderViewProps {
   items: OrderItem[]
   stage: OrderStage
+  currency: Currency
   onAddMore: () => void
   onCancel: (uid: string) => void
   onCheckout: () => void
 }
 
-export function OrderView({ items, stage, onAddMore, onCancel, onCheckout }: OrderViewProps) {
+export function OrderView({ items, stage, currency, onAddMore, onCancel, onCheckout }: OrderViewProps) {
   const { t } = useTranslation()
   const total = items.filter((item) => item.cancelState !== 'approved').reduce((sum, item) => sum + item.price * item.quantity, 0)
 
@@ -47,9 +48,9 @@ export function OrderView({ items, stage, onAddMore, onCancel, onCheckout }: Ord
         <section className="rounded-3xl bg-white p-5 shadow-card dark:bg-charcoal-700 lg:col-span-3">
           <div className="flex items-center justify-between"><div><h2 className="text-lg font-extrabold text-charcoal-900 dark:text-rice-100">{t('order.items_title')}</h2><p className="mt-1 text-xs text-charcoal-500 dark:text-rice-200/60">{t('order.order_no')}</p></div><span className="rounded-full bg-chili-50 px-3 py-1 text-xs font-bold text-chili-600 dark:bg-chili-500/15 dark:text-chili-500">{t('order.item_count', { count: items.length })}</span></div>
           <div className="mt-5 space-y-4">
-            {items.map((item) => <div key={item.uid} className="flex gap-3 border-b border-charcoal-900/5 pb-4 last:border-0 dark:border-white/5"><img src={item.image} alt={item.name} className="h-16 w-16 rounded-xl object-cover" /><div className="min-w-0 flex-1"><div className="flex justify-between gap-3"><p className="truncate font-bold text-charcoal-900 dark:text-rice-100">{item.name} <span className="font-normal text-charcoal-500 dark:text-rice-200/60">× {item.quantity}</span></p><strong className="text-charcoal-900 dark:text-rice-100">{money(item.price * item.quantity)}</strong></div><p className="mt-1 text-xs text-charcoal-500 dark:text-rice-200/60">{item.spec} · {t('order.ordered_by', { name: item.orderedBy })}</p><div className="mt-2 flex items-center justify-between"><span className="rounded-full bg-amber-100 px-2 py-1 text-xs font-bold text-charcoal-700 dark:bg-amber-500/15 dark:text-amber-400">{t(`order.stage.${item.stage}.label`)}</span>{item.cancelState ? <span className="text-xs font-bold text-amber-500">{t('order.cancel_pending')}</span> : item.stage !== 'served' && <button onClick={() => onCancel(item.uid)} className="flex items-center gap-1 text-xs font-semibold text-charcoal-500 hover:text-chili-500 dark:text-rice-200/60 dark:hover:text-chili-500"><RotateCcw size={13} />{t('order.cancel')}</button>}</div></div></div>)}
+            {items.map((item) => <div key={item.uid} className="flex gap-3 border-b border-charcoal-900/5 pb-4 last:border-0 dark:border-white/5"><img src={item.image} alt={item.name} className="h-16 w-16 rounded-xl object-cover" /><div className="min-w-0 flex-1"><div className="flex justify-between gap-3"><p className="truncate font-bold text-charcoal-900 dark:text-rice-100">{item.name} <span className="font-normal text-charcoal-500 dark:text-rice-200/60">× {item.quantity}</span></p><strong className="text-charcoal-900 dark:text-rice-100">{money(item.price * item.quantity, currency)}</strong></div><p className="mt-1 text-xs text-charcoal-500 dark:text-rice-200/60">{item.spec} · {t('order.ordered_by', { name: item.orderedBy })}</p><div className="mt-2 flex items-center justify-between"><span className="rounded-full bg-amber-100 px-2 py-1 text-xs font-bold text-charcoal-700 dark:bg-amber-500/15 dark:text-amber-400">{t(`order.stage.${item.stage}.label`)}</span>{item.cancelState ? <span className="text-xs font-bold text-amber-500">{t('order.cancel_pending')}</span> : item.stage !== 'served' && <button onClick={() => onCancel(item.uid)} className="flex items-center gap-1 text-xs font-semibold text-charcoal-500 hover:text-chili-500 dark:text-rice-200/60 dark:hover:text-chili-500"><RotateCcw size={13} />{t('order.cancel')}</button>}</div></div></div>)}
           </div>
-          <button className="mt-3 flex w-full items-center justify-between rounded-2xl bg-rice-100 p-4 text-left dark:bg-charcoal-900"><span><small className="block text-charcoal-500 dark:text-rice-200/60">{t('order.total')}</small><strong className="text-xl text-chili-500">{money(total)}</strong></span><span className="flex items-center gap-1 text-sm font-bold text-charcoal-900 dark:text-rice-100">{t('order.view_detail')}<ChevronRight size={16} /></span></button>
+          <button className="mt-3 flex w-full items-center justify-between rounded-2xl bg-rice-100 p-4 text-left dark:bg-charcoal-900"><span><small className="block text-charcoal-500 dark:text-rice-200/60">{t('order.total')}</small><strong className="text-xl text-chili-500">{money(total, currency)}</strong></span><span className="flex items-center gap-1 text-sm font-bold text-charcoal-900 dark:text-rice-100">{t('order.view_detail')}<ChevronRight size={16} /></span></button>
           <Button onClick={onCheckout} className="mt-4 w-full"><ReceiptText size={17} />{t('order.checkout')}</Button>
         </section>
       </div>
