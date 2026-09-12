@@ -2,16 +2,17 @@ import { useTranslation } from 'react-i18next'
 import { Check, Minus, Plus, ShoppingBasket, Trash2, Users } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { money } from '@/lib/utils'
-import type { CartItem } from '@/types'
+import type { CartItem, Currency } from '@/types'
 
 interface CartPanelProps {
   items: CartItem[]
   compact?: boolean
+  currency: Currency
   onQuantity: (uid: string, delta: number) => void
   onSubmit: () => void
 }
 
-export function CartPanel({ items, compact, onQuantity, onSubmit }: CartPanelProps) {
+export function CartPanel({ items, compact, currency, onQuantity, onSubmit }: CartPanelProps) {
   const { t } = useTranslation()
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
   const people = [...new Set(items.map((item) => item.orderedBy))]
@@ -37,7 +38,7 @@ export function CartPanel({ items, compact, onQuantity, onSubmit }: CartPanelPro
           <div key={item.uid} className="group flex gap-3 border-b border-charcoal-900/5 pb-4 last:border-0 dark:border-white/5">
             <img src={item.image} alt={item.name} className="h-16 w-16 rounded-xl object-cover" />
             <div className="min-w-0 flex-1">
-              <div className="flex justify-between gap-2"><p className="truncate font-bold text-charcoal-900 dark:text-rice-100">{item.name}</p><strong className="text-sm text-chili-500">{money(item.price * item.quantity)}</strong></div>
+              <div className="flex justify-between gap-2"><p className="truncate font-bold text-charcoal-900 dark:text-rice-100">{item.name}</p><strong className="text-sm text-chili-500">{money(item.price * item.quantity, currency)}</strong></div>
               <p className="mt-1 truncate text-xs text-charcoal-500 dark:text-rice-200/60">{item.spec}</p>
               <div className="mt-2 flex items-center justify-between">
                 <span className="flex items-center gap-1 text-xs font-semibold text-charcoal-500 dark:text-rice-200/60"><span className="h-5 w-5 rounded-full bg-amber-100 text-center leading-5 text-amber-500 dark:bg-amber-500/15">{item.orderedBy.slice(0, 1)}</span>{t('cart.ordered_by', { name: item.orderedBy })}</span>
@@ -52,8 +53,8 @@ export function CartPanel({ items, compact, onQuantity, onSubmit }: CartPanelPro
         ))}
       </div>
       <div className="mt-5 rounded-2xl bg-rice-100 p-4 dark:bg-charcoal-900">
-        <div className="flex justify-between text-sm text-charcoal-500 dark:text-rice-200/60"><span>{t('cart.subtotal')}</span><span>{money(subtotal)}</span></div>
-        <div className="mt-2 flex justify-between font-extrabold text-charcoal-900 dark:text-rice-100"><span>{t('cart.estimated')}</span><span className="text-xl text-chili-500">{money(subtotal)}</span></div>
+        <div className="flex justify-between text-sm text-charcoal-500 dark:text-rice-200/60"><span>{t('cart.subtotal')}</span><span>{money(subtotal, currency)}</span></div>
+        <div className="mt-2 flex justify-between font-extrabold text-charcoal-900 dark:text-rice-100"><span>{t('cart.estimated')}</span><span className="text-xl text-chili-500">{money(subtotal, currency)}</span></div>
       </div>
       <Button onClick={onSubmit} className="mt-4 w-full"><Check size={17} />{compact ? t('cart.submit_new') : t('cart.submit')}</Button>
       <p className="mt-3 text-center text-xs text-charcoal-500 dark:text-rice-200/60">{t('cart.submit_hint')}</p>

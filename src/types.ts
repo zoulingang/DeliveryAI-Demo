@@ -67,3 +67,5 @@ export type AppAction =
   | { type: 'PAY' }
   | { type: 'RESET' }
   | { type: 'SET_MESSAGE'; message: string }
+
+export type Currency = 'CNY' | 'USD'
