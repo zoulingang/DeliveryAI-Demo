@@ -21,6 +21,7 @@ import { test, expect, type Page } from '@playwright/test'
 /** 进入菜单视图（TopBar 中币种切换菜单可见）。 */
 async function goToMenu(page: Page) {
   await page.goto('/?preview=menu')
+  await page.waitForLoadState('networkidle')
 }
 
 /** 打开币种切换弹出菜单。 */
@@ -98,19 +99,19 @@ test.describe('双币种价格展示与切换 - E2E 验收测试', () => {
     test('REQ-002.2: 切换到 USD 后购物车面板价格同步更新', async ({ page }) => {
       await goToMenu(page)
       // 预览购物车含 p3(42)，小计/预估 ¥42.00
-      await expect(page.getByText('¥42.00')).toBeVisible()
+      await expect(page.getByText('¥42.00').first()).toBeVisible()
       await selectCurrency(page, 'USD')
       // 42/7 = 6.00 → $6.00
-      await expect(page.getByText('$6.00')).toBeVisible()
+      await expect(page.getByText('$6.00').first()).toBeVisible()
     })
 
     test('REQ-002.3: 切换到 USD 后订单视图价格同步更新', async ({ page }) => {
       await goToMenu(page)
       await submitOrder(page)
       // 订单视图总价 42 → ¥42.00
-      await expect(page.getByText('¥42.00')).toBeVisible()
+      await expect(page.getByText('¥42.00').first()).toBeVisible()
       await selectCurrency(page, 'USD')
-      await expect(page.getByText('$6.00')).toBeVisible()
+      await expect(page.getByText('$6.00').first()).toBeVisible()
     })
 
     test('REQ-002.4: 切换到 USD 后结账视图价格同步更新', async ({ page }) => {
@@ -118,9 +119,9 @@ test.describe('双币种价格展示与切换 - E2E 验收测试', () => {
       await submitOrder(page)
       await goToCheckout(page)
       // subtotal=42, discount=0, payable=42
-      await expect(page.getByText('¥42.00')).toBeVisible()
+      await expect(page.getByText('¥42.00').first()).toBeVisible()
       await selectCurrency(page, 'USD')
-      await expect(page.getByText('$6.00')).toBeVisible()
+      await expect(page.getByText('$6.00').first()).toBeVisible()
     })
 
     test('REQ-002.5: 切换回 CNY 后全站价格恢复', async ({ page }) => {
@@ -145,7 +146,7 @@ test.describe('双币种价格展示与切换 - E2E 验收测试', () => {
       await goToMenu(page)
       await selectCurrency(page, 'USD')
       // 预览购物车 p3(42) → $6.00
-      await expect(page.getByText('$6.00')).toBeVisible()
+      await expect(page.getByText('$6.00').first()).toBeVisible()
     })
 
     test('REQ-003.3: ¥59 → $8.43（59/7=8.4286…，四舍五入）', async ({ page }) => {
@@ -175,9 +176,9 @@ test.describe('双币种价格展示与切换 - E2E 验收测试', () => {
       await submitOrder(page)
       await goToCheckout(page)
       // subtotal=126, discount=30, payable=96
-      await expect(page.getByText('¥126.00')).toBeVisible()
+      await expect(page.getByText('¥126.00').first()).toBeVisible()
       await expect(page.getByText('-¥30.00')).toBeVisible()
-      await expect(page.getByText('¥96.00')).toBeVisible()
+      await expect(page.getByText('¥96.00').first()).toBeVisible()
     })
 
     test('REQ-004.2: USD 模式下折扣门槛和优惠金额换算显示', async ({ page }) => {
@@ -188,9 +189,9 @@ test.describe('双币种价格展示与切换 - E2E 验收测试', () => {
       await submitOrder(page)
       await goToCheckout(page)
       // subtotal=126/7=18.00, discount=30/7=4.29, payable=96/7=13.71
-      await expect(page.getByText('$18.00')).toBeVisible()
+      await expect(page.getByText('$18.00').first()).toBeVisible()
       await expect(page.getByText('-$4.29')).toBeVisible()
-      await expect(page.getByText('$13.71')).toBeVisible()
+      await expect(page.getByText('$13.71').first()).toBeVisible()
     })
 
     test('REQ-004.3: 底层折扣判断始终以 CNY 为准（42 < 100 无折扣）', async ({ page }) => {
@@ -213,7 +214,7 @@ test.describe('双币种价格展示与切换 - E2E 验收测试', () => {
       // 切换回 CNY
       await selectCurrency(page, 'CNY')
       await expect(page.getByText('-¥30.00')).toBeVisible()
-      await expect(page.getByText('¥96.00')).toBeVisible()
+      await expect(page.getByText('¥96.00').first()).toBeVisible()
     })
   })
 
